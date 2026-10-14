@@ -41,7 +41,7 @@ class Offre(models.Model):
     )
 
     vehicule = models.ForeignKey(
-        "VehiculesApp.vehicule",
+        "VehiculesApp.vehicules",
         on_delete=models.CASCADE,
         related_name='offres_vehicules'
     )

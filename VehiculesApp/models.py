@@ -3,7 +3,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 
 
-class vehicule(models.Model):
+class vehicules(models.Model):
     immatriculation = models.CharField(
         max_length=20,
         unique=True

@@ -1,9 +1,8 @@
-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models.fields import DecimalField
 from django.core.exceptions import ValidationError
 import re
+import uuid
 
 
 def validate_gmail(value):
@@ -22,9 +21,23 @@ def validate_adresse(value):
         raise ValidationError("L'adresse doit contenir au minimum 20 caractères.")
 
 
+def generate_user_id():
+    return uuid.uuid4().hex[:8]
+
+
 class Utilsateur(AbstractUser):
-    user_id = models.CharField(max_length=8, editable=False, primary_key=True)
-    email = models.EmailField(unique=True, validators=[validate_gmail])
+    user_id = models.CharField(
+        max_length=8,
+        editable=False,
+        primary_key=True,
+        default=generate_user_id
+    )
+
+    email = models.EmailField(
+        unique=True,
+        validators=[validate_gmail]
+    )
+
     role = models.CharField(
         max_length=20,
         choices=[
@@ -34,6 +47,7 @@ class Utilsateur(AbstractUser):
         ],
         default='chargeur'
     )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     telephone = models.CharField(max_length=8)
@@ -41,11 +55,13 @@ class Utilsateur(AbstractUser):
 
 class entreprise(models.Model):
     raison_sociale = models.CharField(max_length=100)
+
     matricule_fiscale = models.CharField(
         max_length=17,
         unique=True,
         validators=[validate_matricule_fiscale]
     )
+
     type_entreprise = models.CharField(
         max_length=15,
         choices=[
@@ -54,14 +70,17 @@ class entreprise(models.Model):
         ],
         default='chargeur'
     )
+
     adresse = models.CharField(
         max_length=100,
         validators=[validate_adresse]
     )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-gerant = models.OneToOneField(
-    Utilsateur,
-    on_delete=models.CASCADE,
-    related_name='entreprise'
-)
+
+    gerant = models.OneToOneField(
+        Utilsateur,
+        on_delete=models.CASCADE,
+        related_name='entreprise'
+    )
