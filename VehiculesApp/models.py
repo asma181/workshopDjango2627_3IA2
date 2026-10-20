@@ -1,7 +1,7 @@
 
 from django.db import models
 from django.core.validators import MinValueValidator
-
+from django.core.exceptions import ValidationError
 
 class vehicules(models.Model):
     immatriculation = models.CharField(
@@ -30,14 +30,19 @@ class vehicules(models.Model):
             ('fourgon', 'fourgon')
         ]
     )
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     def clean(self):
         super().clean()
-
-        if self.capacite_kg == 0:
-            from django.core.exceptions import ValidationError
+        if (
+            self.entreprise_id
+            and self.entreprise.type_entreprise != "transporteur"
+        ):
             raise ValidationError({
-                'capacite_kg': "La capacité doit être différente de zéro."
+                "entreprise": (
+                    "Le véhicule doit appartenir à une entreprise "
+                    "de type transporteur."
+                )
             })
 
     def __str__(self):

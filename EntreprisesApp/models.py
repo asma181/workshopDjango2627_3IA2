@@ -3,6 +3,29 @@ from django.db import models
 from django.core.exceptions import ValidationError
 import re
 import uuid
+from datetime import datetime
+from django.db.models import Max
+
+def generate_user_id():
+    year = datetime.now().year % 100
+    prefix = f"{year:02d}user"
+
+    last_user = (
+        Utilsateur.objects
+        .filter(user_id__startswith=prefix)
+        .aggregate(Max("user_id"))["user_id__max"]
+    )
+
+    if last_user:
+        last_number = int(last_user[-2:])
+        next_number = last_number + 1
+    else:
+        next_number = 0
+
+    if next_number > 99:
+        raise ValueError("Limite de 100 utilisateurs atteinte pour cette année.")
+
+    return f"{prefix}{next_number:02d}"
 
 
 def validate_gmail(value):
@@ -20,9 +43,6 @@ def validate_adresse(value):
     if len(value.strip()) < 20:
         raise ValidationError("L'adresse doit contenir au minimum 20 caractères.")
 
-
-def generate_user_id():
-    return uuid.uuid4().hex[:8]
 
 
 class Utilsateur(AbstractUser):
